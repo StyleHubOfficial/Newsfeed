@@ -1,312 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>FocusNews AI Dashboard</title>
-    
-    <!-- Load Tailwind CSS CDN -->
+
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load Lucide Icons for high-tech icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Load Inter Font -->
+
+    <!-- lucide will be lazy-loaded -->
+
+    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS for Premium Effects -->
+
     <style>
-        /* 1. Typography and Global Setup */
-        :root {
-            --color-primary-start: #4B0082; /* Deep Purple */
-            --color-primary-end: #34005d;   /* Darker Purple */
-            --color-accent: #00FFFF;        /* Cyan */
-            --color-glass-bg: rgba(255, 255, 255, 0.05);
+        :root{
+            --color-primary-start: #4B0082;
+            --color-primary-end: #34005d;
+            --color-accent: #00FFFF;
+            --glass-bg: rgba(255,255,255,0.04);
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
+        html,body { height:100%; }
+        body{
+            margin:0;
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
             background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end));
-            background-size: 400% 400%;
+            background-size:400% 400%;
             animation: gradient-cycle 25s ease infinite;
-            color: #E0E7FF;
-            min-height: 100vh;
-            overflow-x: hidden;
+            color: #E6EEFF;
+            -webkit-font-smoothing:antialiased;
         }
-
-        /* Animated Gradient Background */
         @keyframes gradient-cycle {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% { background-position: 0% 50%;}
+            50% { background-position: 100% 50%;}
+            100% { background-position: 0% 50%;}
         }
 
-        /* 2. Glassmorphism Effect */
-        .glassmorphism {
-            background-color: var(--color-glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        .glassmorphism{
+            background: var(--glass-bg);
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
 
-        /* 3. Logo Loader Animation (Hi-Tech) */
-        #app-loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            opacity: 1;
-            transition: opacity 0.8s ease-in-out;
+        /* Loader */
+        #app-loader{
+            position:fixed; inset:0;
+            display:flex; align-items:center; justify-content:center;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.03), rgba(0,0,0,0.9));
+            z-index:60;
+            transition: opacity .6s ease, visibility .6s;
         }
+        #app-loader.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
 
         .logo-svg path {
-            /* Create the drawing effect (assuming a path length of ~400) */
             stroke-dasharray: 400;
             stroke-dashoffset: 400;
-            animation: draw-logo 1.5s ease-in-out forwards;
+            animation: draw-logo 1.4s ease forwards;
+        }
+        @keyframes draw-logo { to { stroke-dashoffset: 0; } }
+
+        /* layout */
+        aside{
+            width: 72px;
+        }
+        @media(min-width:768px){
+            aside{ width: 220px; }
         }
 
-        @keyframes draw-logo {
-            to { stroke-dashoffset: 0; }
+        .nav-item{
+            display:flex; align-items:center; gap:12px;
+            padding:10px 8px;
+            border-radius:10px;
+            color: #EAF6FF;
+            transition: all .18s ease;
         }
+        .nav-item:hover{ transform: translateX(6px); background: rgba(255,255,255,0.03); }
+        .nav-item.active{ background: linear-gradient(90deg, rgba(0,255,255,0.06), rgba(255,255,255,0.01)); box-shadow:0 6px 20px rgba(0,255,255,0.05); }
 
-        /* 4. Shimmer Skeleton Loading */
-        .shimmer {
-            background-color: rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        .shimmer::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.15), 
-                transparent
-            );
-            animation: shimmer-effect 1.5s infinite linear;
+        .card-hover{ transition: transform .18s ease, box-shadow .18s ease; }
+        .card-hover:hover{ transform: translateY(-6px); box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
+
+        .shimmer{ position:relative; overflow:hidden; background: rgba(255,255,255,0.03); }
+        .shimmer::after{
+            content:''; position:absolute; inset:0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
             transform: translateX(-100%);
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { to { transform: translateX(100%); } }
+
+        .ai-feature-btn{ display:inline-flex; gap:.5rem; align-items:center; }
+
+        /* small responsive */
+        @media(max-width:768px){
+            main{ padding-left: 12px; padding-right:12px; }
+            aside{ position:fixed; left:0; top:0; bottom:0; z-index:40; }
+            #app-container{ margin-left:72px; }
         }
 
-        @keyframes shimmer-effect {
-            100% { transform: translateX(100%); }
-        }
+        /* focus mode heading fade */
+        header.opacity-30{ opacity: .28; transition: opacity .35s ease; }
 
-        /* 5. Micro-interactions */
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        /* progress ring */
+        .progress-ring__circle{ transition: stroke-dashoffset 0.6s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
 
-        /* Hide content until loading is done */
-        #app-container.hidden {
-            opacity: 0;
-        }
-        
+        /* accessible focus outline */
+        :focus{ outline: 2px solid rgba(0,255,255,0.18); outline-offset: 2px; }
     </style>
 </head>
-
 <body class="selection:bg-cyan-500 selection:text-black">
 
-    <!-- ========== LOGO LOADING ANIMATION / TRANSITION EFFECT ========== -->
+    <!-- Loader -->
     <div id="app-loader">
-        <svg class="logo-svg" width="120" height="120" viewBox="0 0 100 100">
-            <!-- Hi-Tech "F" for FocusNews -->
-            <path d="M 20 20 L 80 20 M 20 20 L 20 80 M 20 50 L 60 50" 
-                  stroke="var(--color-accent)" stroke-width="5" fill="none" 
-                  stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="35" y="80" font-family="Inter, sans-serif" font-size="20" fill="white">FOCUS</text>
+        <svg class="logo-svg" width="140" height="140" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 20 20 L 80 20 L 80 45 L 40 45 L 40 80 L 20 80 Z" stroke="var(--color-accent)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            <text x="50" y="92" font-family="Inter, sans-serif" font-size="9" fill="#BFEFFF" text-anchor="middle" letter-spacing="1">FOCUSNEWS</text>
         </svg>
     </div>
-    <!-- ============================================================== -->
 
-
-    <!-- ========== MAIN APPLICATION CONTAINER ========== -->
-    <div id="app-container" class="hidden transition duration-700 ease-in-out">
-        <div class="flex h-screen">
-
-            <!-- 1. LEFT NAVIGATION/SIDEBAR (Glassmorphism + Responsive) -->
-            <aside class="w-20 md:w-64 fixed md:static glassmorphism z-40 h-full p-4 flex flex-col justify-between transition-all duration-300">
+    <div id="app-container" class="hidden transition-opacity duration-700 ease-in-out">
+        <div class="flex min-h-screen">
+            <!-- SIDEBAR -->
+            <aside class="glassmorphism px-4 py-6 hidden md:flex flex-col justify-between z-40" aria-label="Main navigation">
                 <div>
-                    <div class="text-2xl font-bold mb-8 text-cyan-400">F.NEWS</div>
-                    <nav id="nav-menu" class="space-y-4">
-                        <button onclick="navigate('news')" class="nav-item active">
-                            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-                            <span class="md:inline hidden ml-3">News Feed</span>
+                    <div class="text-xl font-extrabold mb-6 text-cyan-300">F.NEWS</div>
+                    <nav class="space-y-3">
+                        <button onclick="navigate('news')" id="nav-news" class="nav-item active w-full text-left">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                            <span class="hidden md:inline">News Feed</span>
                         </button>
-                        <button onclick="navigate('dashboard')" class="nav-item">
-                            <i data-lucide="activity" class="w-6 h-6"></i>
-                            <span class="md:inline hidden ml-3">Wellness Dashboard</span>
+                        <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full text-left">
+                            <i data-lucide="activity" class="w-5 h-5"></i>
+                            <span class="hidden md:inline">Wellness Dashboard</span>
                         </button>
-                        <button onclick="navigate('achievements')" class="nav-item">
-                            <i data-lucide="award" class="w-6 h-6"></i>
-                            <span class="md:inline hidden ml-3">Achievements</span>
+                        <button onclick="navigate('achievements')" id="nav-achievements" class="nav-item w-full text-left">
+                            <i data-lucide="award" class="w-5 h-5"></i>
+                            <span class="hidden md:inline">Achievements</span>
                         </button>
-                        <button onclick="navigate('settings')" class="nav-item">
-                            <i data-lucide="settings" class="w-6 h-6"></i>
-                            <span class="md:inline hidden ml-3">Settings</span>
+                        <button onclick="navigate('settings')" id="nav-settings" class="nav-item w-full text-left">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                            <span class="hidden md:inline">Settings</span>
                         </button>
                     </nav>
                 </div>
-                
-                <div class="text-xs text-gray-400 md:block hidden">
-                    FocusMaster v1.0 | <span class="text-cyan-400" id="auth-status">Initializing...</span>
+                <div class="text-xs text-gray-400 hidden md:block">
+                    FocusMaster v1.0 | <span id="auth-status" class="text-cyan-300">Ready</span>
                 </div>
             </aside>
 
-            <!-- 2. MAIN CONTENT AREA -->
-            <main class="flex-1 overflow-y-auto pt-6 px-4 md:px-8 ml-20 md:ml-0">
-                
-                <!-- Page Title -->
-                <h1 id="page-title" class="text-4xl font-extrabold mb-8 text-white">FocusNews Feed</h1>
-
-                <!-- Content Views -->
-                <div id="content-views">
-                    
-                    <!-- NEWS FEED VIEW (Default) -->
-                    <div id="view-news" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                        <!-- Skeleton Loader - Simulating Shimmer Load for initial 3 cards -->
-                        <div class="lg:col-span-2 space-y-6" id="skeleton-group">
-                            <div class="glassmorphism rounded-xl p-6 shimmer h-64"></div>
-                            <div class="glassmorphism rounded-xl p-6 shimmer h-40"></div>
-                        </div>
-
-                        <!-- 1. Intelligent Content Summarization Engine (Feature 1) -->
-                        <div class="lg:col-span-2 card-hover transition duration-300 transform bg-gray-800/60 p-6 rounded-xl shadow-2xl" id="article-card">
-                            <h2 class="text-2xl font-bold text-cyan-400 mb-4">Focus Article: New Quantum Algorithm</h2>
-                            
-                            <div class="glassmorphism p-4 rounded-lg mb-4 text-sm space-y-2">
-                                <div class="flex justify-between items-center border-b border-white/10 pb-2">
-                                    <span class="font-semibold">AI Confidence Score:</span>
-                                    <span class="text-green-400 text-xl font-mono">98%</span>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-white/10 pb-2">
-                                    <span class="font-semibold">Bias Detection:</span>
-                                    <span class="bg-blue-600 px-2 py-0.5 rounded-full text-xs font-semibold">Center-Left</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold">Sentiment Analysis:</span>
-                                    <span class="text-xl">😊 Positive</span>
-                                </div>
-                            </div>
-                            
-                            <p id="original-article-text" class="text-gray-300 mb-4">
-                                The new quantum computing breakthrough significantly reduces calculation time for complex molecular modeling.
-                            </p>
-                            
-                            <!-- Automatic Topic Extraction (Feature 1) -->
-                            <div class="flex flex-wrap gap-2 text-xs">
-                                <span class="bg-purple-600 px-3 py-1 rounded-full">#QuantumComputing</span>
-                                <span class="bg-purple-600 px-3 py-1 rounded-full">#Algorithm</span>
-                                <span class="bg-purple-600 px-3 py-1 rounded-full">#Entity: CERN</span>
-                            </div>
-                            
-                            <!-- LLM INTEGRATION 1: AI Tone Rewriter -->
-                            <div class="mt-4 pt-4 border-t border-cyan-500/30 space-y-3">
-                                <div class="font-semibold text-white/80 flex items-center">
-                                    <i data-lucide="sparkles" class="w-4 h-4 mr-2 text-yellow-400"></i>
-                                    <span>AI Tone Rewriter:</span>
-                                </div>
-                                <div id="rewritten-article-output" class="text-sm italic text-gray-400">
-                                    Select a tone to adjust the summary.
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <button onclick="rewriteArticleTone('simple')" class="ai-feature-btn text-xs bg-cyan-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-cyan-600 transition">
-                                        ✨ Simplify for 5th Grade
-                                    </button>
-                                    <button onclick="rewriteArticleTone('dramatic')" class="ai-feature-btn text-xs bg-purple-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-purple-600 transition">
-                                        ✨ Make it Dramatic
-                                    </button>
-                                    <button onclick="rewriteArticleTone('professional')" class="ai-feature-btn text-xs bg-gray-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-gray-600 transition">
-                                        ✨ Professional Summary
-                                    </button>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- 2. Smart Break System (Feature 6) -->
-                        <div class="glassmorphism p-6 rounded-xl space-y-4 row-span-2">
-                            <h3 class="text-xl font-bold text-cyan-400 flex items-center">
-                                <i data-lucide="clock" class="w-5 h-5 mr-2"></i> Smart Break System
-                            </h3>
-                            <div id="pomodoro-timer" class="text-6xl font-mono text-center mb-4 text-white p-4 rounded-lg bg-black/20" style="text-shadow: 0 0 10px var(--color-accent);">25:00</div>
-                            <p id="break-suggestion" class="text-sm text-gray-300 text-center">Suggested break activity: Take 10 deep breaths.</p>
-                            
-                            <!-- LLM INTEGRATION 2: Personalized Break Tip -->
-                            <div class="text-center mt-2">
-                                <button onclick="generateWellnessSuggestion()" class="bg-purple-500/70 text-white text-xs py-1 px-3 rounded-lg hover:bg-purple-500 transition font-semibold">
-                                    ✨ Personalized Break Tip
-                                </button>
-                            </div>
-                            
-                            <div class="flex justify-center space-x-4">
-                                <button onclick="startPomodoro()" class="bg-cyan-600 text-black py-2 px-4 rounded-full font-bold hover:bg-cyan-500 transition duration-200">Start Focus</button>
-                                <button onclick="resetPomodoro()" class="bg-gray-700 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-600 transition duration-200">Reset</button>
-                            </div>
-                            
-                            <div class="mt-4 text-center">
-                                <a href="#" class="text-cyan-400 text-sm hover:underline">Optional meditation mini-sessions (1 min)</a>
-                            </div>
-                        </div>
-
-                        <!-- 3. Adaptive Reading Experience & Social Responsibility (Features 2 & 7) -->
-                        <div class="lg:col-span-2 card-hover transition duration-300 transform bg-gray-800/60 p-6 rounded-xl shadow-2xl space-y-4">
-                            <h4 class="text-xl font-bold flex items-center">
-                                Source Credibility 
-                                <i data-lucide="badge-check" class="w-5 h-5 ml-2 text-green-400"></i>
-                            </h4>
-
-                            <p class="text-gray-300 text-sm">This article has been Fact Check Verified by multiple independent experts.</p>
-
-                            <!-- Reading Mode Controls -->
-                            <div class="flex flex-wrap gap-4 pt-2 border-t border-white/10">
-                                <button class="flex items-center space-x-2 text-sm bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-600 transition">
-                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                    <span>Dyslexia Font</span>
-                                </button>
-                                <button class="flex items-center space-x-2 text-sm bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-600 transition">
-                                    <i data-lucide="contrast" class="w-4 h-4"></i>
-                                    <span>High Contrast Mode</span>
-                                </button>
-                                <div class="text-sm self-center text-cyan-400">
-                                    Reading Speed Recommendation: 14pt
-                                </div>
-                            </div>
-                        </div>
+            <!-- MAIN -->
+            <main class="flex-1 overflow-y-auto pt-6 px-6 md:px-12 ml-0 md:ml-0">
+                <header class="flex items-center justify-between mb-8">
+                    <h1 id="page-title" class="text-4xl font-extrabold">FocusNews Feed</h1>
+                    <div class="flex items-center gap-4">
+                        <button class="px-3 py-2 rounded-md bg-cyan-400/20 text-cyan-200 text-sm" onclick="toggleTheme()">Hi‑Tech Mode</button>
                     </div>
-                    
-                    <!-- WELLNESS INSIGHTS DASHBOARD VIEW (Feature 3, 9) -->
-                    <div id="view-dashboard" class="hidden space-y-8">
+                </header>
 
+                <!-- CONTENT VIEWS -->
+                <div id="content-views">
+                    <!-- NEWS VIEW -->
+                    <section id="view-news">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 space-y-6">
+                                <div id="skeleton-group" class="space-y-4">
+                                    <div class="glassmorphism rounded-xl p-6 shimmer h-52" aria-hidden="true"></div>
+                                    <div class="glassmorphism rounded-xl p-6 shimmer h-36" aria-hidden="true"></div>
+                                </div>
+
+                                <div id="article-card" class="glassmorphism rounded-xl p-6 bg-gray-900/30 card-hover" role="article" aria-labelledby="article-title">
+                                    <h2 id="article-title" class="text-2xl font-bold text-cyan-300 mb-4">Focus Article: New Quantum Algorithm</h2>
+
+                                    <div class="p-4 rounded-lg mb-4 text-sm space-y-2 glassmorphism">
+                                        <div class="flex justify-between items-center border-b border-white/8 pb-2">
+                                            <span class="font-semibold">AI Confidence Score:</span>
+                                            <span class="text-green-400 text-xl font-mono">98%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center border-b border-white/8 pb-2">
+                                            <span class="font-semibold">Bias Detection:</span>
+                                            <span class="bg-blue-600 px-2 py-0.5 rounded-full text-xs font-semibold">Center-Left</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-semibold">Sentiment Analysis:</span>
+                                            <span class="text-xl">😊 Positive</span>
+                                        </div>
+                                    </div>
+
+                                    <p id="original-article-text" class="text-gray-300 mb-4">
+                                        The new quantum computing breakthrough significantly reduces calculation time for complex molecular modeling.
+                                    </p>
+
+                                    <div class="flex flex-wrap gap-2 text-xs mb-4">
+                                        <span class="bg-purple-600 px-3 py-1 rounded-full">#QuantumComputing</span>
+                                        <span class="bg-purple-600 px-3 py-1 rounded-full">#Algorithm</span>
+                                        <span class="bg-purple-600 px-3 py-1 rounded-full">#CERN</span>
+                                    </div>
+
+                                    <div class="mt-4 pt-4 border-t border-cyan-500/20 space-y-3">
+                                        <div class="font-semibold text-white/80 flex items-center">
+                                            <i data-lucide="sparkles" class="w-4 h-4 mr-2 text-yellow-400"></i>
+                                            <span>AI Tone Rewriter:</span>
+                                        </div>
+                                        <div id="rewritten-article-output" class="text-sm italic text-gray-400" aria-live="polite">
+                                            Select a tone to adjust the summary.
+                                        </div>
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <button onclick="rewriteArticleTone('simple')" class="ai-feature-btn text-xs bg-cyan-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-cyan-600 transition">
+                                                ✨ Simplify for 5th Grade
+                                            </button>
+                                            <button onclick="rewriteArticleTone('dramatic')" class="ai-feature-btn text-xs bg-purple-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-purple-600 transition">
+                                                ✨ Make it Dramatic
+                                            </button>
+                                            <button onclick="rewriteArticleTone('professional')" class="ai-feature-btn text-xs bg-gray-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-gray-600 transition">
+                                                ✨ Professional Summary
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Adaptive Reading Experience -->
+                                    <div id="adaptive-reading" class="mt-6 glassmorphism p-4 rounded-lg space-y-3" aria-labelledby="adaptive-title">
+                                      <div class="flex items-center justify-between">
+                                        <h3 id="adaptive-title" class="font-semibold text-white">Adaptive Reading Experience</h3>
+                                        <span class="text-xs text-gray-300">Animations: smooth</span>
+                                      </div>
+
+                                      <div class="flex items-center gap-3">
+                                        <label class="flex items-center gap-2" title="Dyslexia-friendly font" aria-label="Dyslexia font toggle">
+                                          <input id="toggle-dyslexia" type="checkbox" class="sr-only" />
+                                          <div class="w-10 h-6 bg-gray-700 rounded-full relative transition" role="switch" aria-checked="false"></div>
+                                          <span class="text-sm text-gray-300">Dyslexia font</span>
+                                        </label>
+
+                                        <label class="flex items-center gap-2">
+                                          <input id="toggle-contrast" type="checkbox" class="sr-only" />
+                                          <div class="w-10 h-6 bg-gray-700 rounded-full relative transition" role="switch" aria-checked="false"></div>
+                                          <span class="text-sm text-gray-300">High contrast</span>
+                                        </label>
+
+                                        <div class="ml-auto flex items-center gap-2">
+                                          <label for="fontSize" class="text-sm text-gray-300">Font:</label>
+                                          <input id="fontSize" type="range" min="14" max="22" value="16" class="w-36" aria-label="Reading font size">
+                                        </div>
+                                      </div>
+
+                                      <div class="flex items-center justify-between">
+                                        <button id="focus-read-btn" class="bg-cyan-500/80 text-black px-3 py-1 rounded-md text-sm">Enter Focus Mode</button>
+                                        <div id="reading-hint" class="text-xs text-gray-400">Focus mode fades UI for immersive reading.</div>
+                                      </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Right column: Breaks and Pomodoro -->
+                            <div class="glassmorphism p-6 rounded-xl space-y-4">
+                                <h3 class="text-xl font-bold text-cyan-300 flex items-center"><i data-lucide="clock" class="w-5 h-5 mr-2"></i> Smart Break System</h3>
+                                <div id="pomodoro-timer" class="text-6xl font-mono text-center mb-4 text-white p-4 rounded-lg bg-black/20" style="text-shadow: 0 0 12px var(--color-accent);">25:00</div>
+                                <p id="break-suggestion" class="text-sm text-gray-300 text-center" aria-live="polite">Suggested break activity: Take 10 deep breaths.</p>
+
+                                <div class="text-center mt-2">
+                                    <button id="personal-suggest" onclick="generateWellnessSuggestion()" class="bg-purple-500/70 text-white text-xs py-1 px-3 rounded-lg hover:bg-purple-500 transition font-semibold">
+                                        ✨ Personalized Break Tip
+                                    </button>
+                                </div>
+
+                                <div class="flex justify-center space-x-4 mt-3">
+                                    <button id="start-btn" onclick="startPomodoro()" class="bg-cyan-600 text-black py-2 px-4 rounded-full font-bold hover:bg-cyan-500 transition duration-200">Start Focus</button>
+                                    <button onclick="resetPomodoro()" class="bg-gray-700 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-600 transition duration-200">Reset</button>
+                                </div>
+
+                                <div class="mt-4 text-center">
+                                    <a href="#" class="text-cyan-300 text-sm hover:underline">Optional meditation mini-sessions (1 min)</a>
+                                </div>
+                            </div>
+
+                            <!-- Source credibility card spanning bottom -->
+                            <div class="lg:col-span-2 card-hover transition duration-300 transform bg-gray-900/30 p-6 rounded-xl shadow-2xl space-y-4">
+                                <h4 class="text-xl font-bold flex items-center">
+                                    Source Credibility <i data-lucide="badge-check" class="w-5 h-5 ml-2 text-green-400"></i>
+                                </h4>
+                                <p class="text-gray-300 text-sm">This article has been Fact Check Verified by multiple independent experts.</p>
+
+                                <div class="flex flex-wrap gap-4 pt-2 border-t border-white/10">
+                                    <button class="flex items-center space-x-2 text-sm bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-600 transition">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                        <span>Dyslexia Font</span>
+                                    </button>
+                                    <button class="flex items-center space-x-2 text-sm bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-600 transition">
+                                        <i data-lucide="contrast" class="w-4 h-4"></i>
+                                        <span>High Contrast Mode</span>
+                                    </button>
+                                    <div class="text-sm self-center text-cyan-300">Reading Speed Recommendation: 14pt</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- DASHBOARD VIEW -->
+                    <section id="view-dashboard" class="hidden space-y-8">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Emotional Intelligence Dashboard -->
                             <div class="glassmorphism p-6 rounded-xl md:col-span-2">
-                                <h2 class="text-2xl font-bold mb-4 flex items-center">
-                                    <i data-lucide="zap" class="w-6 h-6 mr-2 text-yellow-400"></i> Emotional Intelligence Dashboard
-                                </h2>
-                                
+                                <h2 class="text-2xl font-bold mb-4 flex items-center"><i data-lucide="zap" class="w-6 h-6 mr-2 text-yellow-400"></i> Emotional Intelligence Dashboard</h2>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="bg-red-900/40 p-3 rounded-lg">
                                         <div class="text-lg font-semibold">Anxiety Detector</div>
                                         <p class="text-sm text-red-300">ALERT: 75% of recent articles are highly negative. Suggesting a 10% positive news boost now.</p>
                                     </div>
                                     <div class="bg-blue-900/40 p-3 rounded-lg">
-                                        <div class="text-lg font-semibold">"News Mood" Visualization</div>
+                                        <div class="text-lg font-semibold">News Mood</div>
                                         <div class="h-16 w-full bg-gray-700 rounded-md mt-1 relative overflow-hidden">
-                                            <!-- Simple bar visualization placeholder -->
                                             <div class="absolute inset-y-0 left-0 bg-green-500 w-[20%]"></div>
                                             <div class="absolute inset-y-0 left-[20%] bg-gray-500 w-[60%]"></div>
                                             <div class="absolute inset-y-0 right-0 bg-red-500 w-[20%]"></div>
@@ -318,411 +321,313 @@
                                     <button class="bg-green-600 text-black py-2 px-6 rounded-full font-bold hover:bg-green-500 transition">Mental Health Check-in Prompt</button>
                                 </div>
                             </div>
-                            
-                            <!-- Wellness Insights -->
+
                             <div class="glassmorphism p-6 rounded-xl">
                                 <h3 class="text-xl font-bold mb-4">Wellness Insights</h3>
                                 <div class="space-y-3 text-sm">
                                     <div class="flex justify-between items-center">
                                         <span>Best Focus Time:</span>
-                                        <span class="font-semibold text-cyan-400">9:30 AM - 11:00 AM</span>
+                                        <span class="font-semibold text-cyan-300">9:30 AM - 11:00 AM</span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span>Stress Level Correlation:</span>
-                                        <!-- This span is used by the LLM function to get the simulated stress level -->
-                                        <span id="stress-level-display" class="font-semibold text-red-400">High</span> 
+                                        <span id="stress-level-display" class="font-semibold text-red-400">High</span>
                                     </div>
                                     <div class="flex justify-between items-center">
                                         <span>This Week's Reading:</span>
                                         <span class="font-semibold">3.5 Hours</span>
                                     </div>
-                                    <!-- Animated Charts Placeholder -->
                                     <div class="h-16 bg-black/20 rounded-lg flex items-center justify-center">
                                         <i data-lucide="bar-chart-2" class="w-8 h-8 text-cyan-400"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- ACHIEVEMENTS VIEW (Feature 5) -->
-                    <div id="view-achievements" class="hidden space-y-8">
-                        <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50"></div>
+                    </section>
+
+                    <!-- ACHIEVEMENTS VIEW -->
+                    <section id="view-achievements" class="hidden">
+                        <div id="confetti-container" class="pointer-events-none"></div>
                         <h2 class="text-3xl font-bold mb-6">Your Reading Achievements</h2>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                   
-        .file-preview .file-icon {
-            font-size: 48px;
-            color: var(--primary-color);
-        }
-        
-        .file-info {
-            padding: 15px;
-        }
-        
-        .file-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .file-details {
-            font-size: 0.85rem;
-            color: #6c757d;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .file-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        
-        .download-btn, .delete-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
-        
-        .download-btn {
-            background-color: var(--success-color);
-            color: white;
-        }
-        
-        .download-btn:hover {
-            background-color: #218838;
-        }
-        
-        .delete-btn {
-            background-color: var(--danger-color);
-            color: white;
-        }
-        
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-        }
-        
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 6px;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transform: translateX(150%);
-            transition: transform 0.3s;
-            z-index: 1000;
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.success {
-            background-color: var(--success-color);
-        }
-        
-        .notification.error {
-            background-color: var(--danger-color);
-        }
-        
-        @media (max-width: 768px) {
-            .files-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .files-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .upload-section, .files-section {
-                padding: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Permanent File Storage</h1>
-            <p class="subtitle">Upload and access your files anytime, anywhere</p>
-        </header>
-        
-        <section class="upload-section">
-            <h2 class="section-title">Upload Files</h2>
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📁</div>
-                <p>Drag & drop files here or click to browse</p>
-                <input type="file" class="file-input" id="fileInput" multiple>
-                <button class="upload-btn" id="uploadBtn">Upload Files</button>
-            </div>
-            <div id="fileList"></div>
-        </section>
-        
-        <section class="files-section">
-            <h2 class="section-title">Your Files</h2>
-            <div class="files-grid" id="filesGrid">
-                <!-- Files will be displayed here -->
-            </div>
-            <div class="empty-state" id="emptyState">
-                <div class="empty-state-icon">📂</div>
-                <h3>No files uploaded yet</h3>
-                <p>Upload your first file using the form above</p>
-            </div>
-        </section>
+                            <div class="glassmorphism p-4 rounded-xl text-center">
+                                <div class="text-3xl mb-2">🏆</div>
+                                <div class="font-semibold">Streak: 7 days</div>
+                                <div class="text-xs text-gray-300">Keep it up!</div>
+                            </div>
+                            <div class="glassmorphism p-4 rounded-xl text-center">
+                                <div class="text-3xl mb-2">📚</div>
+                                <div class="font-semibold">Articles Read: 34</div>
+                                <div class="text-xs text-gray-300">This month</div>
+                            </div>
+                            <div class="glassmorphism p-4 rounded-xl text-center">
+                                <div class="text-3xl mb-2">⚡</div>
+                                <div class="font-semibold">Focus Score: 82</div>
+                                <div class="text-xs text-gray-300">Improving</div>
+                            </div>
+                            <div class="glassmorphism p-4 rounded-xl text-center">
+                                <div class="text-3xl mb-2">🔒</div>
+                                <div class="font-semibold">Privacy: On</div>
+                                <div class="text-xs text-gray-300">Your data is local</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- SETTINGS -->
+                    <section id="view-settings" class="hidden space-y-4">
+                        <h2 class="text-2xl font-bold">Settings</h2>
+                        <div class="glassmorphism p-4 rounded-xl">
+                            <label class="flex items-center justify-between gap-4">
+                                <span>Enable Auto-Summary</span>
+                                <input type="checkbox" id="autosummary" checked />
+                            </label>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
     </div>
-    
-    <div class="notification" id="notification"></div>
-    
+
     <script>
-        // DOM Elements
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const filesGrid = document.getElementById('filesGrid');
-        const emptyState = document.getElementById('emptyState');
-        const notification = document.getElementById('notification');
-        
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFilesFromStorage();
-            
-            // Event listeners
-            uploadArea.addEventListener('click', () => fileInput.click());
-            uploadArea.addEventListener('dragover', handleDragOver);
-            uploadArea.addEventListener('dragleave', handleDragLeave);
-            uploadArea.addEventListener('drop', handleDrop);
-            fileInput.addEventListener('change', handleFileSelect);
-            uploadBtn.addEventListener('click', handleUpload);
+        // Lazy-load lucide after idle to improve startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const idle = window.requestIdleCallback || (fn => setTimeout(fn, 500));
+            idle(() => {
+                const s = document.createElement('script');
+                s.src = 'https://unpkg.com/lucide@latest';
+                s.defer = true;
+                s.onload = () => { if (window.lucide && lucide.replace) lucide.replace(); };
+                document.head.appendChild(s);
+            });
         });
-        
-        // Drag and drop handlers
-        function handleDragOver(e) {
-            e.preventDefault();
-            uploadArea.classList.add('drag-over');
-        }
-        
-        function handleDragLeave(e) {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
-        }
-        
-        function handleDrop(e) {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                processFiles(files);
-            }
-        }
-        
-        // File selection handler
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                processFiles(files);
-            }
-        }
-        
-        // Upload button handler
-        function handleUpload() {
-            fileInput.click();
-        }
-        
-        // Process selected files
-        function processFiles(files) {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
-            
-            Array.from(files).forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <p>${file.name} (${formatFileSize(file.size)})</p>
-                `;
-                fileList.appendChild(fileItem);
-                
-                // Save file to storage
-                saveFileToStorage(file);
-            });
-            
-            // Clear the file input
-            fileInput.value = '';
-            
-            // Show success notification
-            showNotification('Files uploaded successfully!', 'success');
-            
-            // Reload the files display
-            loadFilesFromStorage();
-        }
-        
-        // Save file to localStorage (simulating permanent storage)
-        function saveFileToStorage(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const fileData = {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    data: e.target.result,
-                    uploadDate: new Date().toISOString()
-                };
-                
-                // Get existing files from storage
-                let storedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
-                
-                // Add new file
-                storedFiles.push(fileData);
-                
-                // Save back to storage
-                localStorage.setItem('uploadedFiles', JSON.stringify(storedFiles));
-            };
-            
-            reader.readAsDataURL(file);
-        }
-        
-        // Load files from storage and display them
-        function loadFilesFromStorage() {
-            const storedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
-            
-            if (storedFiles.length === 0) {
-                filesGrid.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            filesGrid.innerHTML = '';
-            
-            storedFiles.forEach((file, index) => {
-                const fileCard = document.createElement('div');
-                fileCard.className = 'file-card';
-                
-                let previewContent = '';
-                if (file.type.startsWith('image/')) {
-                    previewContent = `<img src="${file.data}" alt="${file.name}">`;
-                } else {
-                    previewContent = `<div class="file-icon">📄</div>`;
-                }
-                
-                fileCard.innerHTML = `
-                    <div class="file-preview">
-                        ${previewContent}
-                    </div>
-                    <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-details">
-                            <span>${formatFileSize(file.size)}</span>
-                            <span>${formatDate(file.uploadDate)}</span>
-                        </div>
-                        <div class="file-actions">
-                            <button class="download-btn" data-index="${index}">Download</button>
-                            <button class="delete-btn" data-index="${index}">Delete</button>
-                        </div>
-                    </div>
-                `;
-                
-                filesGrid.appendChild(fileCard);
-            });
-            
-            // Add event listeners to download and delete buttons
-            document.querySelectorAll('.download-btn').forEach(btn => {
-                btn.addEventListener('click', handleDownload);
-            });
-            
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', handleDelete);
-            });
-        }
-        
-        // Handle file download
-        function handleDownload(e) {
-            const index = e.target.getAttribute('data-index');
-            const storedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
-            const file = storedFiles[index];
-            
-            const a = document.createElement('a');
-            a.href = file.data;
-            a.download = file.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            showNotification('File downloaded successfully!', 'success');
-        }
-        
-        // Handle file deletion
-        function handleDelete(e) {
-            const index = e.target.getAttribute('data-index');
-            const storedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
-            
-            // Remove file from array
-            storedFiles.splice(index, 1);
-            
-            // Save updated array back to storage
-            localStorage.setItem('uploadedFiles', JSON.stringify(storedFiles));
-            
-            // Reload files display
-            loadFilesFromStorage();
-            
-            showNotification('File deleted successfully!', 'success');
-        }
-        
-        // Utility function to format file size
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-        
-        // Utility function to format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString();
-        }
-        
-        // Show notification
-        function showNotification(message, type) {
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
-            
+
+        // Initialize lucide icons if already available
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide && lucide.replace) lucide.replace();
+        });
+
+        // Loader hide and app show
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('app-loader');
+            const app = document.getElementById('app-container');
+
             setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+                loader.classList.add('hidden');
+                app.classList.remove('hidden');
+                const skeleton = document.getElementById('skeleton-group');
+                if (skeleton) skeleton.style.display = 'none';
+            }, 900);
+        });
+
+        // Simple navigation
+        function navigate(view){
+            const views = ['news','dashboard','achievements','settings'];
+            views.forEach(v => {
+                const el = document.getElementById('view-' + v);
+                if(el) el.classList.toggle('hidden', v !== view);
+                const navBtn = document.getElementById('nav-' + v);
+                if(navBtn) navBtn.classList.toggle('active', v === view);
+            });
+            const titleMap = {
+                news: 'FocusNews Feed',
+                dashboard: 'Wellness Dashboard',
+                achievements: 'Your Achievements',
+                settings: 'Settings'
+            };
+            document.getElementById('page-title').textContent = titleMap[view] || 'FocusNews';
+            if (window.lucide && lucide.replace) lucide.replace();
         }
+
+        // --- Adaptive Reading controls ---
+        const dyslexiaToggle = document.getElementById('toggle-dyslexia');
+        const contrastToggle = document.getElementById('toggle-contrast');
+        const fontSizeRange = document.getElementById('fontSize');
+        const focusReadBtn = document.getElementById('focus-read-btn');
+
+        function applyReadingPrefs() {
+          const article = document.getElementById('original-article-text');
+          if (!article) return;
+          if (dyslexiaToggle && dyslexiaToggle.checked) {
+            article.style.fontFamily = "'OpenDyslexic', 'Inter', sans-serif";
+            dyslexiaToggle.setAttribute('aria-checked','true');
+          } else if (dyslexiaToggle) {
+            article.style.fontFamily = "'Inter', sans-serif";
+            dyslexiaToggle.setAttribute('aria-checked','false');
+          }
+          if (contrastToggle && contrastToggle.checked) {
+            document.documentElement.style.setProperty('--color-primary-start','#001219');
+            document.documentElement.style.setProperty('--color-primary-end','#001e2e');
+            contrastToggle.setAttribute('aria-checked','true');
+          } else if (contrastToggle) {
+            document.documentElement.style.removeProperty('--color-primary-start');
+            document.documentElement.style.removeProperty('--color-primary-end');
+            contrastToggle.setAttribute('aria-checked','false');
+          }
+          if (fontSizeRange) {
+            const size = fontSizeRange.value;
+            article.style.fontSize = `${size}px`;
+          }
+        }
+
+        if (dyslexiaToggle) dyslexiaToggle.addEventListener('change', applyReadingPrefs);
+        if (contrastToggle) contrastToggle.addEventListener('change', applyReadingPrefs);
+        if (fontSizeRange) fontSizeRange.addEventListener('input', applyReadingPrefs);
+
+        if (focusReadBtn) focusReadBtn.addEventListener('click', () => {
+          const aside = document.querySelector('aside');
+          const header = document.querySelector('header');
+          const main = document.querySelector('main');
+          if (aside) aside.classList.toggle('hidden');
+          if (header) header.classList.toggle('opacity-30');
+          if (focusReadBtn.textContent.includes('Enter')) {
+            focusReadBtn.textContent = 'Exit Focus Mode';
+          } else {
+            focusReadBtn.textContent = 'Enter Focus Mode';
+            if (aside) aside.classList.remove('hidden');
+            if (header) header.classList.remove('opacity-30');
+          }
+        });
+
+        // AI tone rewriter (server-backed)
+        async function rewriteArticleTone(tone){
+          const original = document.getElementById('original-article-text')?.textContent.trim() || '';
+          const out = document.getElementById('rewritten-article-output');
+          if (!out) return;
+          out.classList.add('shimmer');
+          out.textContent = 'Generating...';
+
+          try {
+            const resp = await fetch('/api/rewrite', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: original, tone })
+            });
+            if (!resp.ok) {
+              const err = await resp.text();
+              out.textContent = 'Error generating rewrite';
+              console.error(err);
+              out.classList.remove('shimmer');
+              return;
+            }
+            const data = await resp.json();
+            out.textContent = data.rewritten || 'No output';
+            out.style.opacity = 0;
+            out.style.transition = 'opacity .35s ease';
+            requestAnimationFrame(()=> out.style.opacity = 1);
+          } catch (e) {
+            console.error(e);
+            out.textContent = 'Network error';
+          } finally {
+            out.classList.remove('shimmer');
+          }
+        }
+
+        // Wellness suggestion via server-backed LLM
+        async function generateWellnessSuggestion(){
+          const suggestionEl = document.getElementById('break-suggestion');
+          if (!suggestionEl) return;
+          suggestionEl.classList.add('shimmer');
+          suggestionEl.textContent = 'Thinking...';
+          try {
+            const resp = await fetch('/api/suggestion', { method:'POST', headers:{'Content-Type':'application/json' }, body: JSON.stringify({ context: 'reader is slightly fatigued after reading technical article' })});
+            if (!resp.ok) {
+              suggestionEl.textContent = 'Could not fetch suggestion';
+              console.error(await resp.text());
+              suggestionEl.classList.remove('shimmer');
+              return;
+            }
+            const data = await resp.json();
+            suggestionEl.textContent = data.suggestion || 'Take a short break.';
+            suggestionEl.animate([{ transform:'scale(.98)'},{ transform:'scale(1.02)'},{ transform:'scale(1)'}], { duration: 450, easing: 'ease-out' });
+          } catch (err) {
+            suggestionEl.textContent = 'Could not fetch suggestion';
+            console.error(err);
+          } finally {
+            suggestionEl.classList.remove('shimmer');
+          }
+        }
+
+        // Pomodoro (simple)
+        let pomodoroDuration = 25 * 60;
+        let timer = null;
+        let remaining = pomodoroDuration;
+        const timerEl = document.getElementById('pomodoro-timer');
+
+        function formatMMSS(s){
+            const m = Math.floor(s/60).toString().padStart(2,'0');
+            const sec = (s%60).toString().padStart(2,'0');
+            return `${m}:${sec}`;
+        }
+
+        function startPomodoro(){
+            if(timer) return;
+            remaining = remaining || pomodoroDuration;
+            const startBtn = document.getElementById('start-btn');
+            if (startBtn) startBtn.textContent = 'Pause';
+            timer = setInterval(() => {
+                remaining--;
+                if(timerEl) timerEl.textContent = formatMMSS(remaining);
+                if(remaining <= 0){
+                    clearInterval(timer);
+                    timer = null;
+                    remaining = pomodoroDuration;
+                    showToast('Focus session complete 🎉', 'success');
+                    flashConfetti();
+                }
+            }, 1000);
+            document.getElementById('start-btn').onclick = pausePomodoro;
+        }
+
+        function pausePomodoro(){
+            if(timer) clearInterval(timer);
+            timer = null;
+            const startBtn = document.getElementById('start-btn');
+            if (startBtn) startBtn.textContent = 'Resume';
+            if (startBtn) startBtn.onclick = startPomodoro;
+        }
+
+        function resetPomodoro(){
+            if(timer) { clearInterval(timer); timer = null; }
+            remaining = pomodoroDuration;
+            if(timerEl) timerEl.textContent = formatMMSS(remaining);
+            const startBtn = document.getElementById('start-btn');
+            if (startBtn) startBtn.textContent = 'Start Focus';
+            if (startBtn) startBtn.onclick = startPomodoro;
+        }
+
+        // small toast
+        function showToast(msg, type='info'){
+            const el = document.createElement('div');
+            el.textContent = msg;
+            el.className = 'fixed right-6 top-6 px-4 py-2 rounded-md text-white z-50';
+            el.style.background = (type==='success') ? 'linear-gradient(90deg,#06b6d4,#0ea5e9)' : 'rgba(0,0,0,0.6)';
+            document.body.appendChild(el);
+            setTimeout(()=> el.style.opacity = '0', 2400);
+            setTimeout(()=> el.remove(), 3000);
+        }
+
+        function flashConfetti(){
+            const conf = document.createElement('div');
+            conf.style.position = 'fixed';
+            conf.style.inset = 0;
+            conf.style.pointerEvents = 'none';
+            conf.style.background = 'radial-gradient(circle at 20% 30%, rgba(0,255,200,0.08), transparent 10%), radial-gradient(circle at 80% 70%, rgba(255,100,200,0.06), transparent 12%)';
+            conf.style.zIndex = 80;
+            conf.style.transition = 'opacity .6s ease';
+            document.body.appendChild(conf);
+            setTimeout(()=> conf.style.opacity = '0', 600);
+            setTimeout(()=> conf.remove(), 900);
+        }
+
+        function toggleTheme(){
+            document.documentElement.classList.toggle('tech-glow');
+            showToast('Hi-tech mode toggled', 'success');
+        }
+
+        (function init(){
+            if(timerEl) timerEl.textContent = formatMMSS(pomodoroDuration);
+        })();
     </script>
 </body>
 </html>
