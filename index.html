@@ -66,6 +66,7 @@
   </style>
 </head>
 <body>
+  <div id="vanta-bg" style="position:fixed;inset:0;z-index:0;pointer-events:none"></div>
   <div class="bg-anim" aria-hidden="true"></div>
   <div class="neon-grid" aria-hidden="true"></div>
 
@@ -218,10 +219,27 @@
 
   <!-- client script -->
   <script>
+    // API base: leave empty for same-origin, otherwise set to full origin like 'http://localhost:5173'
+    window.API_BASE = '';
+
     // lazy init lucide icons
     (function lazyIcons(){
       const idle = window.requestIdleCallback || (fn=>setTimeout(fn,500));
       idle(()=>{const s=document.createElement('script');s.src='https://unpkg.com/lucide@latest';s.defer=true;s.onload=()=>{if(window.lucide) lucide.replace()};document.head.appendChild(s)});
+    })();
+
+    // Vanta background (WebGL) - lazy load three + vanta
+    (function loadVanta(){
+      const idle = window.requestIdleCallback || (fn=>setTimeout(fn,500));
+      idle(async ()=>{
+        try{
+          if(!window.THREE){
+            await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+          }
+          await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/vanta@0.5.21/dist/vanta.net.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+          if(window.VANTA) window.vantaEffect = VANTA.NET({ el: '#vanta-bg', color: 0x00ffd5, backgroundColor: 0x0b0514, points: 12.00, maxDistance: 22.00, spacing: 18.00 });
+        }catch(e){console.warn('Vanta init failed',e)}
+      });
     })();
 
     // progress ring helper
@@ -238,11 +256,12 @@
     // recommendation carousel controls
     const recTrack = document.getElementById('recTrack'); let recIndex=0; const recLen = recTrack?.children?.length||0;
     function updateRec(){
+      if(!recTrack || recLen===0) return;
       const w = recTrack.children[0].getBoundingClientRect().width + 12;
       recTrack.style.transform = `translateX(${-(recIndex*w)}px)`;
     }
-    document.getElementById('recNext')?.addEventListener('click', ()=>{recIndex = (recIndex+1)%recLen; updateRec()});
-    document.getElementById('recPrev')?.addEventListener('click', ()=>{recIndex = (recIndex-1+recLen)%recLen; updateRec()});
+    document.getElementById('recNext')?.addEventListener('click', ()=>{if(recLen===0) return; recIndex = (recIndex+1)%recLen; updateRec()});
+    document.getElementById('recPrev')?.addEventListener('click', ()=>{if(recLen===0) return; recIndex = (recIndex-1+recLen)%recLen; updateRec()});
     window.addEventListener('resize', ()=> setTimeout(updateRec,120));
 
     // adaptive reading prefs (keyboard accessible)
@@ -251,19 +270,21 @@
 
     // Pomodoro minimal
     let pomodoroDuration = 25*60; let timer=null; let remaining=pomodoroDuration; const timerEl=document.getElementById('pomodoro-timer');
-    function formatMMSS(s){return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
+    function formatMMSS(s){return \
+      `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
     function startPomodoro(){ if(timer) return; const startBtn=document.getElementById('start-btn'); startBtn.textContent='Pause'; timer=setInterval(()=>{remaining--; if(timerEl) timerEl.textContent=formatMMSS(remaining); if(remaining<=0){clearInterval(timer);timer=null;remaining=pomodoroDuration;startBtn.textContent='Start';flashConfetti()}} ,1000); startBtn.onclick=pausePomodoro }
     function pausePomodoro(){ if(timer) clearInterval(timer); timer=null; const startBtn=document.getElementById('start-btn'); startBtn.textContent='Start'; startBtn.onclick=startPomodoro }
     document.getElementById('start-btn')?.addEventListener('click', startPomodoro);
     function flashConfetti(){ const el=document.createElement('div'); el.style.position='fixed'; el.style.inset=0; el.style.zIndex=60; el.style.pointerEvents='none'; el.style.background='radial-gradient(circle at 20% 30%, rgba(0,255,200,0.06), transparent 10%), radial-gradient(circle at 80% 70%, rgba(138,43,226,0.06), transparent 12%)'; document.body.appendChild(el); setTimeout(()=>el.remove(),800) }
 
-    // LLM integration (server-backed)
-    async function rewriteArticleTone(tone){ const original=document.getElementById('original-article-text')?.textContent||''; const out=document.getElementById('rewritten-article-output'); if(!out) return; out.textContent='Generating...'; out.classList.add('shimmer'); try{ const r=await fetch('/api/rewrite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:original,tone})}); if(!r.ok){ out.textContent='Error generating rewrite'; return } const data=await r.json(); out.textContent=data.rewritten||data.output||'No output'; out.animate([{opacity:0},{opacity:1}],{duration:360,fill:'forwards'}) }catch(e){console.error(e); out.textContent='Network error'} finally{out.classList.remove('shimmer')} }
+    // LLM integration (server-backed) - use API_BASE when configured
+    function api(path){ return (window.API_BASE||'') + path }
+    async function rewriteArticleTone(tone){ const original=document.getElementById('original-article-text')?.textContent||''; const out=document.getElementById('rewritten-article-output'); if(!out) return; out.textContent='Generating...'; out.classList.add('shimmer'); try{ const r=await fetch(api('/api/rewrite'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:original,tone})}); if(!r.ok){ out.textContent='Error generating rewrite'; return } const data=await r.json(); out.textContent=data.rewritten||data.output||'No output'; out.animate([{opacity:0},{opacity:1}],{duration:360,fill:'forwards'}) }catch(e){console.error(e); out.textContent='Network error'} finally{out.classList.remove('shimmer')} }
 
-    async function generateWellnessSuggestion(){ const el=document.getElementById('break-suggestion'); if(!el) return; el.textContent='Thinking...'; el.classList.add('shimmer'); try{ const r=await fetch('/api/suggestion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'reader is slightly fatigued'})}); if(!r.ok){el.textContent='Unable to fetch'; return} const d=await r.json(); el.textContent=d.suggestion||d.output||'Take a short break'; el.animate([{transform:'scale(.98)'},{transform:'scale(1.02)'},{transform:'scale(1)'}],{duration:420}) }catch(err){console.error(err); el.textContent='Network error'} finally{el.classList.remove('shimmer')} }
+    async function generateWellnessSuggestion(){ const el=document.getElementById('break-suggestion'); if(!el) return; el.textContent='Thinking...'; el.classList.add('shimmer'); try{ const r=await fetch(api('/api/suggestion'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'reader is slightly fatigued'})}); if(!r.ok){el.textContent='Unable to fetch'; return} const d=await r.json(); el.textContent=d.suggestion||d.output||'Take a short break'; el.animate([{transform:'scale(.98)'},{transform:'scale(1.02)'},{transform:'scale(1)'}],{duration:420}) }catch(err){console.error(err); el.textContent='Network error'} finally{el.classList.remove('shimmer')} }
 
     // mode banner (show if not openai)
-    async function fetchModeAndNotify(){ try{ const r=await fetch('/api/mode'); if(!r.ok) return; const j=await r.json(); if(j.mode && j.mode!=='openai'){ const b=document.createElement('div'); b.setAttribute('role','status'); b.className='fixed left-1/2 -translate-x-1/2 top-4 z-60 bg-yellow-600/10 border border-yellow-400 text-yellow-200 px-4 py-2 rounded-md text-sm'; b.style.backdropFilter='blur(6px)'; b.textContent = j.mode==='simulate' ? 'Demo Mode: using simulated responses. Set OPENAI_API_KEY or LOCAL_MODEL_URL to enable live LLM.' : `Local Model Mode: forwarding to ${j.info||'local model'}`; document.body.appendChild(b); setTimeout(()=>b.remove(),8000) } }catch(e){console.warn('mode check failed',e)} }
+    async function fetchModeAndNotify(){ try{ const r=await fetch(api('/api/mode')); if(!r.ok) return; const j=await r.json(); if(j.mode && j.mode!=='openai'){ const b=document.createElement('div'); b.setAttribute('role','status'); b.className='fixed left-1/2 -translate-x-1/2 top-4 z-60 bg-yellow-600/10 border border-yellow-400 text-yellow-200 px-4 py-2 rounded-md text-sm'; b.style.backdropFilter='blur(6px)'; b.textContent = j.mode==='simulate' ? 'Demo Mode: using simulated responses. Set OPENAI_API_KEY or LOCAL_MODEL_URL to enable live LLM.' : `Local Model Mode: forwarding to ${j.info||'local model'}`; document.body.appendChild(b); setTimeout(()=>b.remove(),8000) } }catch(e){console.warn('mode check failed',e)} }
     window.addEventListener('load', fetchModeAndNotify);
 
     // accessibility: keyboard nav for cards (simple)
