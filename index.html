@@ -1,633 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>FocusNews AI Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FocusNews — Hi‑Tech News & Wellness</title>
+  <meta name="description" content="FocusNews AI — adaptive reading, wellness tips, and powered rewriting with a hi‑tech interface.">
 
-    <!-- Tailwind CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com" defer></script>
+  <!-- Preconnect fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-    <!-- lucide will be lazy-loaded -->
+  <style>
+    :root{
+      --bg1:#0b0514;
+      --bg2:#0e1430;
+      --accent1:#00ffd5;
+      --accent2:#8a2be2;
+      --glass: rgba(255,255,255,0.04);
+      --muted:#9aa4b2;
+    }
+    html,body{height:100%;}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#e6f0ff;background:radial-gradient(1200px 600px at 10% 10%, rgba(138,43,226,0.12), transparent 8%), linear-gradient(180deg,var(--bg1),var(--bg2));-webkit-font-smoothing:antialiased;}
 
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    /* floating particles background (CSS) */
+    .bg-anim{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .bg-anim::before,.bg-anim::after{content:"";position:absolute;left:-10%;top:-10%;width:120%;height:120%;background:radial-gradient(circle at 10% 20%, rgba(0,255,213,0.06), transparent 6%), radial-gradient(circle at 90% 80%, rgba(138,43,226,0.06), transparent 6%);animation:float 18s linear infinite;filter:blur(28px)}
+    .bg-anim::after{animation:float 24s linear infinite reverse;opacity:.7}
+    @keyframes float{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6%) rotate(3deg)}100%{transform:translateY(0) rotate(0)}}
 
-    <style>
-        :root{
-            --color-primary-start: #4B0082;
-            --color-primary-end: #34005d;
-            --color-accent: #00FFFF;
-            --glass-bg: rgba(255,255,255,0.04);
-        }
-        html,body { height:100%; }
-        body{
-            margin:0;
-            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end));
-            background-size:400% 400%;
-            animation: gradient-cycle 25s ease infinite;
-            color: #E6EEFF;
-            -webkit-font-smoothing:antialiased;
-        }
-        @keyframes gradient-cycle {
-            0% { background-position: 0% 50%;}
-            50% { background-position: 100% 50%;}
-            100% { background-position: 0% 50%;}
-        }
+    /* neon grid */
+    .neon-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);background-size: 140px 140px, 140px 140px;mix-blend-mode:overlay;opacity:0.12}
+    /* glass card */
+    .card{background:var(--glass);border:1px solid rgba(255,255,255,0.06);backdrop-filter: blur(8px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border-radius:14px}
+    /* animated accent border */
+    .glow-border{position:relative;overflow:hidden}
+    .glow-border::after{content:"";position:absolute;inset:-2px;background:linear-gradient(90deg,var(--accent1),#7aa7ff,var(--accent2));filter:blur(18px);opacity:0.8;transform:translateX(-120%);transition:transform .9s cubic-bezier(.2,.9,.2,1)}
+    .glow-border:hover::after{transform:translateX(0)}
 
-        .glassmorphism{
-            background: var(--glass-bg);
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-        }
+    /* hover tilt */
+    .tilt{transition:transform .28s cubic-bezier(.2,.9,.2,1)}
+    .tilt:hover{transform:translateY(-8px) rotateX(3deg) rotateY(-3deg)}
 
-        /* Loader */
-        #app-loader{
-            position:fixed; inset:0;
-            display:flex; align-items:center; justify-content:center;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.03), rgba(0,0,0,0.9));
-            z-index:60;
-            transition: opacity .6s ease, visibility .6s;
-        }
-        #app-loader.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+    /* shimmering text */
+    .shimmer-text{background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.2), rgba(255,255,255,0.06));-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite}
+    @keyframes shine{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
-        .logo-svg path {
-            stroke-dasharray: 400;
-            stroke-dashoffset: 400;
-            animation: draw-logo 1.4s ease forwards;
-        }
-        @keyframes draw-logo { to { stroke-dashoffset: 0; } }
+    /* animated card reveal */
+    .reveal{opacity:0;transform:translateY(12px) scale(.995);animation:revealAnim .7s forwards ease}
+    .reveal.delay-1{animation-delay:.08s}.reveal.delay-2{animation-delay:.16s}.reveal.delay-3{animation-delay:.24s}
+    @keyframes revealAnim{to{opacity:1;transform:translateY(0) scale(1)}}
 
-        /* layout */
-        aside{
-            width: 72px;
-        }
-        @media(min-width:768px){
-            aside{ width: 220px; }
-        }
+    /* progress ring */
+    .ring-wrap{width:88px;height:88px;display:inline-block}
+    .progress-ring__circle{transition:stroke-dashoffset .9s ease;transform:rotate(-90deg);transform-origin:50% 50%}
 
-        .nav-item{
-            display:flex; align-items:center; gap:12px;
-            padding:10px 8px;
-            border-radius:10px;
-            color: #EAF6FF;
-            transition: all .18s ease;
-        }
-        .nav-item:hover{ transform: translateX(6px); background: rgba(255,255,255,0.03); }
-        .nav-item.active{ background: linear-gradient(90deg, rgba(0,255,255,0.06), rgba(255,255,255,0.01)); box-shadow:0 6px 20px rgba(0,255,255,0.05); }
+    /* carousel */
+    .carousel{display:flex;gap:12px;overflow:hidden}
+    .carousel-track{display:flex;gap:12px;transition:transform .5s cubic-bezier(.2,.9,.2,1)}
 
-        .card-hover{ transition: transform .18s ease, box-shadow .18s ease; }
-        .card-hover:hover{ transform: translateY(-6px); box-shadow: 0 14px 40px rgba(0,0,0,0.45); }
-
-        .shimmer{ position:relative; overflow:hidden; background: rgba(255,255,255,0.03); }
-        .shimmer::after{
-            content:''; position:absolute; inset:0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-            transform: translateX(-100%);
-            animation: shimmer 1.4s infinite;
-        }
-        @keyframes shimmer { to { transform: translateX(100%); } }
-
-        .ai-feature-btn{ display:inline-flex; gap:.5rem; align-items:center; }
-
-        /* small responsive */
-        @media(max-width:768px){
-            main{ padding-left: 12px; padding-right:12px; }
-            aside{ position:fixed; left:0; top:0; bottom:0; z-index:40; }
-            #app-container{ margin-left:72px; }
-        }
-
-        /* focus mode heading fade */
-        header.opacity-30{ opacity: .28; transition: opacity .35s ease; }
-
-        /* progress ring */
-        .progress-ring__circle{ transition: stroke-dashoffset 0.6s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
-
-        /* accessible focus outline */
-        :focus{ outline: 2px solid rgba(0,255,255,0.18); outline-offset: 2px; }
-    </style>
+    /* small screens */
+    @media(max-width:640px){.hide-sm{display:none}}
+  </style>
 </head>
-<body class="selection:bg-cyan-500 selection:text-black">
+<body>
+  <div class="bg-anim" aria-hidden="true"></div>
+  <div class="neon-grid" aria-hidden="true"></div>
 
-    <!-- Loader -->
-    <div id="app-loader">
-        <svg class="logo-svg" width="140" height="140" viewBox="0 0 100 100" aria-hidden="true">
-            <path d="M 20 20 L 80 20 L 80 45 L 40 45 L 40 80 L 20 80 Z" stroke="var(--color-accent)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-            <text x="50" y="92" font-family="Inter, sans-serif" font-size="9" fill="#BFEFFF" text-anchor="middle" letter-spacing="1">FOCUSNEWS</text>
-        </svg>
+  <header class="relative z-20 p-4 md:px-10 md:py-6 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="p-2 rounded-lg card glow-border">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h10M4 18h16" stroke="#9df7e8" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="text-sm text-slate-300">FocusNews</div>
+        <div class="text-xs text-slate-400 hide-sm">Hi‑Tech News & Wellness • Assisted by AI</div>
+      </div>
     </div>
 
-    <div id="app-container" class="hidden transition-opacity duration-700 ease-in-out">
-        <div class="flex min-h-screen">
-            <!-- SIDEBAR -->
-            <aside class="glassmorphism px-4 py-6 hidden md:flex flex-col justify-between z-40" aria-label="Main navigation">
-                <div>
-                    <div class="text-xl font-extrabold mb-6 text-cyan-300">F.NEWS</div>
-                    <nav class="space-y-3">
-                        <button onclick="navigate('news')" id="nav-news" class="nav-item active w-full text-left">
-                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                            <span class="hidden md:inline">News Feed</span>
-                        </button>
-                        <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-item w-full text-left">
-                            <i data-lucide="activity" class="w-5 h-5"></i>
-                            <span class="hidden md:inline">Wellness Dashboard</span>
-                        </button>
-                        <button onclick="navigate('achievements')" id="nav-achievements" class="nav-item w-full text-left">
-                            <i data-lucide="award" class="w-5 h-5"></i>
-                            <span class="hidden md:inline">Achievements</span>
-                        </button>
-                        <button onclick="navigate('settings')" id="nav-settings" class="nav-item w-full text-left">
-                            <i data-lucide="settings" class="w-5 h-5"></i>
-                            <span class="hidden md:inline">Settings</span>
-                        </button>
-                    </nav>
-                </div>
-                <div class="text-xs text-gray-400 hidden md:block">
-                    FocusMaster v1.0 | <span id="auth-status" class="text-cyan-300">Ready</span>
-                </div>
-            </aside>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <input id="search" class="bg-transparent border border-white/6 placeholder-slate-400 text-sm px-3 py-2 rounded-md w-44 md:w-64 focus:ring-2 focus:ring-cyan-400/30 outline-none" placeholder="Search topics, tags or authors" aria-label="Search">
+        <button id="searchBtn" class="absolute right-1 top-1 text-xs px-2 py-1 rounded-md bg-cyan-500/10 hover:bg-cyan-500/20" aria-label="Search button">Go</button>
+      </div>
+      <button id="notifBtn" class="p-2 card rounded-md hover:scale-105" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 1 0-3 0v.68C7.64 5.36 6 7.92 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h11z" stroke="#bfefff" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="flex items-center gap-2 card p-1 rounded-full" style="padding-left:8px;padding-right:8px">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-300 to-purple-400 flex items-center justify-center text-black font-bold">A</div>
+      </div>
+    </div>
+  </header>
 
-            <!-- MAIN -->
-            <main class="flex-1 overflow-y-auto pt-6 px-6 md:px-12 ml-0 md:ml-0">
-                <header class="flex items-center justify-between mb-8">
-                    <h1 id="page-title" class="text-4xl font-extrabold">FocusNews Feed</h1>
-                    <div class="flex items-center gap-4">
-                        <button class="px-3 py-2 rounded-md bg-cyan-400/20 text-cyan-200 text-sm" onclick="toggleTheme()">Hi‑Tech Mode</button>
-                    </div>
-                </header>
+  <main class="relative z-20 p-6 md:p-10 max-w-7xl mx-auto">
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div class="lg:col-span-2 space-y-6">
 
-                <!-- CONTENT VIEWS -->
-                <div id="content-views">
-                    <!-- NEWS VIEW -->
-                    <section id="view-news">
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div class="lg:col-span-2 space-y-6">
-                                <div id="skeleton-group" class="space-y-4">
-                                    <div class="glassmorphism rounded-xl p-6 shimmer h-52" aria-hidden="true"></div>
-                                    <div class="glassmorphism rounded-xl p-6 shimmer h-36" aria-hidden="true"></div>
-                                </div>
+        <article class="card p-6 glow-border tilt reveal delay-1" aria-labelledby="hero-title">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h1 id="hero-title" class="text-3xl md:text-4xl font-extrabold tracking-tight"><span class="shimmer-text">FocusNews</span> — Quantum Breakthrough</h1>
+              <p class="text-sm text-slate-300 mt-2">AI-powered summarization • Adaptive reading • Wellness suggestions</p>
 
-                                <div id="article-card" class="glassmorphism rounded-xl p-6 bg-gray-900/30 card-hover" role="article" aria-labelledby="article-title">
-                                    <h2 id="article-title" class="text-2xl font-bold text-cyan-300 mb-4">Focus Article: New Quantum Algorithm</h2>
+              <div class="mt-4 flex items-center gap-3">
+                <button class="px-4 py-2 rounded-md bg-cyan-400 text-black font-semibold hover:scale-105 transition-transform" onclick="rewriteArticleTone('professional')">Rewrite</button>
+                <button class="px-3 py-2 rounded-md border border-white/8 text-sm hover:bg-white/3" onclick="rewriteArticleTone('simple')">Simplify</button>
+                <button class="px-3 py-2 rounded-md border border-white/8 text-sm hover:bg-white/3" onclick="rewriteArticleTone('dramatic')">Dramatic</button>
+              </div>
+            </div>
+            <div class="text-right">
+              <div id="focus-score" class="ring-wrap card p-2 rounded-lg text-center">
+                <svg width="64" height="64" viewBox="0 0 120 120">
+                  <defs><linearGradient id="g1" x1="0%" x2="100%"><stop offset="0%" stop-color="#00ffd5"/><stop offset="100%" stop-color="#8a2be2"/></linearGradient></defs>
+                  <circle cx="60" cy="60" r="48" stroke="rgba(255,255,255,0.06)" stroke-width=8 fill="none" />
+                  <circle id="progressCircle" cx="60" cy="60" r="48" stroke="url(#g1)" stroke-width=8 stroke-linecap="round" fill="none" class="progress-ring__circle" stroke-dasharray="301.44" stroke-dashoffset="301.44" />
+                  <text x="60" y="66" text-anchor="middle" font-size="20" fill="#e9fbff" font-weight="700">82</text>
+                </svg>
+                <div class="text-xs text-slate-300 mt-1">Focus Score</div>
+              </div>
+            </div>
+          </div>
 
-                                    <div class="p-4 rounded-lg mb-4 text-sm space-y-2 glassmorphism">
-                                        <div class="flex justify-between items-center border-b border-white/8 pb-2">
-                                            <span class="font-semibold">AI Confidence Score:</span>
-                                            <span class="text-green-400 text-xl font-mono">98%</span>
-                                        </div>
-                                        <div class="flex justify-between items-center border-b border-white/8 pb-2">
-                                            <span class="font-semibold">Bias Detection:</span>
-                                            <span class="bg-blue-600 px-2 py-0.5 rounded-full text-xs font-semibold">Center-Left</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="font-semibold">Sentiment Analysis:</span>
-                                            <span class="text-xl">😊 Positive</span>
-                                        </div>
-                                    </div>
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="card p-4 rounded-lg reveal delay-2">
+              <div class="text-sm text-slate-300 font-semibold">AI Confidence</div>
+              <div class="text-lg text-green-300 font-mono mt-2">98%</div>
+            </div>
+            <div class="card p-4 rounded-lg reveal delay-2">
+              <div class="text-sm text-slate-300 font-semibold">Sentiment</div>
+              <div class="text-lg text-yellow-300 mt-2">Positive</div>
+            </div>
+          </div>
 
-                                    <p id="original-article-text" class="text-gray-300 mb-4">
-                                        The new quantum computing breakthrough significantly reduces calculation time for complex molecular modeling.
-                                    </p>
+          <div class="mt-6">
+            <h3 class="text-sm text-slate-300 font-semibold">Original</h3>
+            <p id="original-article-text" class="mt-2 text-slate-200 leading-relaxed">The new quantum computing breakthrough significantly reduces calculation time for complex molecular modeling.</p>
+          </div>
 
-                                    <div class="flex flex-wrap gap-2 text-xs mb-4">
-                                        <span class="bg-purple-600 px-3 py-1 rounded-full">#QuantumComputing</span>
-                                        <span class="bg-purple-600 px-3 py-1 rounded-full">#Algorithm</span>
-                                        <span class="bg-purple-600 px-3 py-1 rounded-full">#CERN</span>
-                                    </div>
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div id="rewritten-article-output" class="md:col-span-3 text-slate-300 italic text-sm card p-3 rounded-md reveal delay-3" aria-live="polite">Select a tone to adjust the summary. AI responses will show here.</div>
+          </div>
+        </article>
 
-                                    <div class="mt-4 pt-4 border-t border-cyan-500/20 space-y-3">
-                                        <div class="font-semibold text-white/80 flex items-center">
-                                            <i data-lucide="sparkles" class="w-4 h-4 mr-2 text-yellow-400"></i>
-                                            <span>AI Tone Rewriter:</span>
-                                        </div>
-                                        <div id="rewritten-article-output" class="text-sm italic text-gray-400" aria-live="polite">
-                                            Select a tone to adjust the summary.
-                                        </div>
-                                        <div class="flex flex-wrap gap-2 mt-2">
-                                            <button onclick="rewriteArticleTone('simple')" class="ai-feature-btn text-xs bg-cyan-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-cyan-600 transition">
-                                                ✨ Simplify for 5th Grade
-                                            </button>
-                                            <button onclick="rewriteArticleTone('dramatic')" class="ai-feature-btn text-xs bg-purple-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-purple-600 transition">
-                                                ✨ Make it Dramatic
-                                            </button>
-                                            <button onclick="rewriteArticleTone('professional')" class="ai-feature-btn text-xs bg-gray-700/70 py-1.5 px-3 rounded-lg font-semibold hover:bg-gray-600 transition">
-                                                ✨ Professional Summary
-                                            </button>
-                                        </div>
-                                    </div>
+        <!-- Recommendations carousel -->
+        <section class="card p-4 tilt reveal delay-2">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-lg font-semibold">Personalized Recommendations</h4>
+            <div class="text-xs text-slate-400">Based on reading patterns • animated</div>
+          </div>
+          <div class="carousel" aria-roledescription="carousel" id="recommendation-carousel">
+            <div class="carousel-track" id="recTrack">
+              <div class="p-4 card rounded-lg min-w-[240px]">
+                <div class="text-sm text-slate-400">Morning boost</div>
+                <div class="font-semibold mt-2">Short stretch & deep breaths</div>
+              </div>
+              <div class="p-4 card rounded-lg min-w-[240px]">
+                <div class="text-sm text-slate-400">Reading tip</div>
+                <div class="font-semibold mt-2">Skim headings, then deep read</div>
+              </div>
+              <div class="p-4 card rounded-lg min-w-[240px]">
+                <div class="text-sm text-slate-400">Focus microtask</div>
+                <div class="font-semibold mt-2">25-min sprint with timer</div>
+              </div>
+            </div>
+          </div>
 
-                                    <!-- Adaptive Reading Experience -->
-                                    <div id="adaptive-reading" class="mt-6 glassmorphism p-4 rounded-lg space-y-3" aria-labelledby="adaptive-title">
-                                      <div class="flex items-center justify-between">
-                                        <h3 id="adaptive-title" class="font-semibold text-white">Adaptive Reading Experience</h3>
-                                        <span class="text-xs text-gray-300">Animations: smooth</span>
-                                      </div>
+          <div class="mt-3 flex gap-2">
+            <button id="recPrev" class="px-3 py-1 rounded-md border border-white/6 text-sm">Prev</button>
+            <button id="recNext" class="px-3 py-1 rounded-md bg-cyan-500 text-black font-semibold">Next</button>
+            <button id="recRefresh" class="ml-auto px-3 py-1 rounded-md border border-white/6 text-sm" onclick="generateWellnessSuggestion()">Refresh Tips</button>
+          </div>
+        </section>
 
-                                      <div class="flex items-center gap-3">
-                                        <label class="flex items-center gap-2" title="Dyslexia-friendly font" aria-label="Dyslexia font toggle">
-                                          <input id="toggle-dyslexia" type="checkbox" class="sr-only" />
-                                          <div class="w-10 h-6 bg-gray-700 rounded-full relative transition" role="switch" aria-checked="false"></div>
-                                          <span class="text-sm text-gray-300">Dyslexia font</span>
-                                        </label>
+      </div>
 
-                                        <label class="flex items-center gap-2">
-                                          <input id="toggle-contrast" type="checkbox" class="sr-only" />
-                                          <div class="w-10 h-6 bg-gray-700 rounded-full relative transition" role="switch" aria-checked="false"></div>
-                                          <span class="text-sm text-gray-300">High contrast</span>
-                                        </label>
-
-                                        <div class="ml-auto flex items-center gap-2">
-                                          <label for="fontSize" class="text-sm text-gray-300">Font:</label>
-                                          <input id="fontSize" type="range" min="14" max="22" value="16" class="w-36" aria-label="Reading font size">
-                                        </div>
-                                      </div>
-
-                                      <div class="flex items-center justify-between">
-                                        <button id="focus-read-btn" class="bg-cyan-500/80 text-black px-3 py-1 rounded-md text-sm">Enter Focus Mode</button>
-                                        <div id="reading-hint" class="text-xs text-gray-400">Focus mode fades UI for immersive reading.</div>
-                                      </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Right column: Breaks and Pomodoro -->
-                            <div class="glassmorphism p-6 rounded-xl space-y-4">
-                                <h3 class="text-xl font-bold text-cyan-300 flex items-center"><i data-lucide="clock" class="w-5 h-5 mr-2"></i> Smart Break System</h3>
-                                <div id="pomodoro-timer" class="text-6xl font-mono text-center mb-4 text-white p-4 rounded-lg bg-black/20" style="text-shadow: 0 0 12px var(--color-accent);">25:00</div>
-                                <p id="break-suggestion" class="text-sm text-gray-300 text-center" aria-live="polite">Suggested break activity: Take 10 deep breaths.</p>
-
-                                <div class="text-center mt-2">
-                                    <button id="personal-suggest" onclick="generateWellnessSuggestion()" class="bg-purple-500/70 text-white text-xs py-1 px-3 rounded-lg hover:bg-purple-500 transition font-semibold">
-                                        ✨ Personalized Break Tip
-                                    </button>
-                                </div>
-
-                                <div class="flex justify-center space-x-4 mt-3">
-                                    <button id="start-btn" onclick="startPomodoro()" class="bg-cyan-600 text-black py-2 px-4 rounded-full font-bold hover:bg-cyan-500 transition duration-200">Start Focus</button>
-                                    <button onclick="resetPomodoro()" class="bg-gray-700 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-600 transition duration-200">Reset</button>
-                                </div>
-
-                                <div class="mt-4 text-center">
-                                    <a href="#" class="text-cyan-300 text-sm hover:underline">Optional meditation mini-sessions (1 min)</a>
-                                </div>
-                            </div>
-
-                            <!-- Source credibility card spanning bottom -->
-                            <div class="lg:col-span-2 card-hover transition duration-300 transform bg-gray-900/30 p-6 rounded-xl shadow-2xl space-y-4">
-                                <h4 class="text-xl font-bold flex items-center">
-                                    Source Credibility <i data-lucide="badge-check" class="w-5 h-5 ml-2 text-green-400"></i>
-                                </h4>
-                                <p class="text-gray-300 text-sm">This article has been Fact Check Verified by multiple independent experts.</p>
-
-                                <div class="flex flex-wrap gap-4 pt-2 border-t border-white/10">
-                                    <button class="flex items-center space-x-2 text-sm bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-600 transition">
-                                        <i data-lucide="eye" class="w-4 h-4"></i>
-                                        <span>Dyslexia Font</span>
-                                    </button>
-                                    <button class="flex items-center space-x-2 text-sm bg-purple-700 px-3 py-1.5 rounded-full hover:bg-purple-600 transition">
-                                        <i data-lucide="contrast" class="w-4 h-4"></i>
-                                        <span>High Contrast Mode</span>
-                                    </button>
-                                    <div class="text-sm self-center text-cyan-300">Reading Speed Recommendation: 14pt</div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- DASHBOARD VIEW -->
-                    <section id="view-dashboard" class="hidden space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="glassmorphism p-6 rounded-xl md:col-span-2">
-                                <h2 class="text-2xl font-bold mb-4 flex items-center"><i data-lucide="zap" class="w-6 h-6 mr-2 text-yellow-400"></i> Emotional Intelligence Dashboard</h2>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="bg-red-900/40 p-3 rounded-lg">
-                                        <div class="text-lg font-semibold">Anxiety Detector</div>
-                                        <p class="text-sm text-red-300">ALERT: 75% of recent articles are highly negative. Suggesting a 10% positive news boost now.</p>
-                                    </div>
-                                    <div class="bg-blue-900/40 p-3 rounded-lg">
-                                        <div class="text-lg font-semibold">News Mood</div>
-                                        <div class="h-16 w-full bg-gray-700 rounded-md mt-1 relative overflow-hidden">
-                                            <div class="absolute inset-y-0 left-0 bg-green-500 w-[20%]"></div>
-                                            <div class="absolute inset-y-0 left-[20%] bg-gray-500 w-[60%]"></div>
-                                            <div class="absolute inset-y-0 right-0 bg-red-500 w-[20%]"></div>
-                                            <p class="absolute inset-0 flex items-center justify-center text-white text-xs">20% Positive | 60% Neutral | 20% Negative</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-4 text-center">
-                                    <button class="bg-green-600 text-black py-2 px-6 rounded-full font-bold hover:bg-green-500 transition">Mental Health Check-in Prompt</button>
-                                </div>
-                            </div>
-
-                            <div class="glassmorphism p-6 rounded-xl">
-                                <h3 class="text-xl font-bold mb-4">Wellness Insights</h3>
-                                <div class="space-y-3 text-sm">
-                                    <div class="flex justify-between items-center">
-                                        <span>Best Focus Time:</span>
-                                        <span class="font-semibold text-cyan-300">9:30 AM - 11:00 AM</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span>Stress Level Correlation:</span>
-                                        <span id="stress-level-display" class="font-semibold text-red-400">High</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span>This Week's Reading:</span>
-                                        <span class="font-semibold">3.5 Hours</span>
-                                    </div>
-                                    <div class="h-16 bg-black/20 rounded-lg flex items-center justify-center">
-                                        <i data-lucide="bar-chart-2" class="w-8 h-8 text-cyan-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ACHIEVEMENTS VIEW -->
-                    <section id="view-achievements" class="hidden">
-                        <div id="confetti-container" class="pointer-events-none"></div>
-                        <h2 class="text-3xl font-bold mb-6">Your Reading Achievements</h2>
-
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div class="glassmorphism p-4 rounded-xl text-center">
-                                <div class="text-3xl mb-2">🏆</div>
-                                <div class="font-semibold">Streak: 7 days</div>
-                                <div class="text-xs text-gray-300">Keep it up!</div>
-                            </div>
-                            <div class="glassmorphism p-4 rounded-xl text-center">
-                                <div class="text-3xl mb-2">📚</div>
-                                <div class="font-semibold">Articles Read: 34</div>
-                                <div class="text-xs text-gray-300">This month</div>
-                            </div>
-                            <div class="glassmorphism p-4 rounded-xl text-center">
-                                <div class="text-3xl mb-2">⚡</div>
-                                <div class="font-semibold">Focus Score: 82</div>
-                                <div class="text-xs text-gray-300">Improving</div>
-                            </div>
-                            <div class="glassmorphism p-4 rounded-xl text-center">
-                                <div class="text-3xl mb-2">🔒</div>
-                                <div class="font-semibold">Privacy: On</div>
-                                <div class="text-xs text-gray-300">Your data is local</div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- SETTINGS -->
-                    <section id="view-settings" class="hidden space-y-4">
-                        <h2 class="text-2xl font-bold">Settings</h2>
-                        <div class="glassmorphism p-4 rounded-xl">
-                            <label class="flex items-center justify-between gap-4">
-                                <span>Enable Auto-Summary</span>
-                                <input type="checkbox" id="autosummary" checked />
-                            </label>
-                        </div>
-                    </section>
-                </div>
-            </main>
+      <!-- RIGHT COLUMN -->
+      <aside class="space-y-6">
+        <div class="card p-4 rounded-lg reveal delay-1 glow-border">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-slate-300">Smart Break</div>
+              <div id="pomodoro-timer" class="text-4xl font-mono mt-2">25:00</div>
+            </div>
+            <div>
+              <button id="start-btn" class="px-3 py-2 rounded-md bg-cyan-400 text-black font-semibold">Start</button>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-slate-400" id="break-suggestion" aria-live="polite">Suggested: Take 10 deep breaths.</div>
         </div>
-    </div>
 
-    <script>
-        // Lazy-load lucide after idle to improve startup
-        window.addEventListener('DOMContentLoaded', () => {
-            const idle = window.requestIdleCallback || (fn => setTimeout(fn, 500));
-            idle(() => {
-                const s = document.createElement('script');
-                s.src = 'https://unpkg.com/lucide@latest';
-                s.defer = true;
-                s.onload = () => { if (window.lucide && lucide.replace) lucide.replace(); };
-                document.head.appendChild(s);
-            });
-        });
+        <div class="card p-4 rounded-lg reveal delay-2 glow-border">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-slate-300">Reading Mode</div>
+            <div>
+              <button id="focus-mode-toggle" class="px-2 py-1 rounded-md border border-white/8 text-sm">Toggle</button>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-slate-400">Dyslexia font • High contrast • Adjustable size</div>
+        </div>
 
-        // Initialize lucide icons if already available
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.lucide && lucide.replace) lucide.replace();
-        });
+        <div class="card p-4 rounded-lg reveal delay-3">
+          <div class="text-sm text-slate-300 font-semibold">Your Achievements</div>
+          <div class="mt-3 flex gap-2">
+            <div class="p-3 rounded-md bg-gradient-to-br from-cyan-300 to-purple-400 text-black font-bold">🏆</div>
+            <div>
+              <div class="text-sm">Streak</div>
+              <div class="font-semibold">7 days</div>
+            </div>
+          </div>
+        </div>
 
-        // Loader hide and app show
-        window.addEventListener('load', () => {
-            const loader = document.getElementById('app-loader');
-            const app = document.getElementById('app-container');
+      </aside>
+    </section>
+  </main>
 
-            setTimeout(() => {
-                loader.classList.add('hidden');
-                app.classList.remove('hidden');
-                const skeleton = document.getElementById('skeleton-group');
-                if (skeleton) skeleton.style.display = 'none';
-            }, 900);
-        });
+  <footer class="z-20 relative p-6 text-center text-xs text-slate-400">Built with care — FocusNews • Local-first privacy</footer>
 
-        // Simple navigation
-        function navigate(view){
-            const views = ['news','dashboard','achievements','settings'];
-            views.forEach(v => {
-                const el = document.getElementById('view-' + v);
-                if(el) el.classList.toggle('hidden', v !== view);
-                const navBtn = document.getElementById('nav-' + v);
-                if(navBtn) navBtn.classList.toggle('active', v === view);
-            });
-            const titleMap = {
-                news: 'FocusNews Feed',
-                dashboard: 'Wellness Dashboard',
-                achievements: 'Your Achievements',
-                settings: 'Settings'
-            };
-            document.getElementById('page-title').textContent = titleMap[view] || 'FocusNews';
-            if (window.lucide && lucide.replace) lucide.replace();
-        }
+  <!-- client script -->
+  <script>
+    // lazy init lucide icons
+    (function lazyIcons(){
+      const idle = window.requestIdleCallback || (fn=>setTimeout(fn,500));
+      idle(()=>{const s=document.createElement('script');s.src='https://unpkg.com/lucide@latest';s.defer=true;s.onload=()=>{if(window.lucide) lucide.replace()};document.head.appendChild(s)});
+    })();
 
-        // --- Adaptive Reading controls ---
-        const dyslexiaToggle = document.getElementById('toggle-dyslexia');
-        const contrastToggle = document.getElementById('toggle-contrast');
-        const fontSizeRange = document.getElementById('fontSize');
-        const focusReadBtn = document.getElementById('focus-read-btn');
+    // progress ring helper
+    function setProgress(percent){
+      const circle = document.getElementById('progressCircle');
+      const radius = 48; const circumference = 2*Math.PI*radius;
+      circle.style.strokeDasharray = circumference;
+      const offset = circumference - (percent/100)*circumference;
+      circle.style.strokeDashoffset = offset;
+    }
+    // animate to 82 by default
+    document.addEventListener('DOMContentLoaded', ()=> setTimeout(()=> setProgress(82), 500));
 
-        function applyReadingPrefs() {
-          const article = document.getElementById('original-article-text');
-          if (!article) return;
-          if (dyslexiaToggle && dyslexiaToggle.checked) {
-            article.style.fontFamily = "'OpenDyslexic', 'Inter', sans-serif";
-            dyslexiaToggle.setAttribute('aria-checked','true');
-          } else if (dyslexiaToggle) {
-            article.style.fontFamily = "'Inter', sans-serif";
-            dyslexiaToggle.setAttribute('aria-checked','false');
-          }
-          if (contrastToggle && contrastToggle.checked) {
-            document.documentElement.style.setProperty('--color-primary-start','#001219');
-            document.documentElement.style.setProperty('--color-primary-end','#001e2e');
-            contrastToggle.setAttribute('aria-checked','true');
-          } else if (contrastToggle) {
-            document.documentElement.style.removeProperty('--color-primary-start');
-            document.documentElement.style.removeProperty('--color-primary-end');
-            contrastToggle.setAttribute('aria-checked','false');
-          }
-          if (fontSizeRange) {
-            const size = fontSizeRange.value;
-            article.style.fontSize = `${size}px`;
-          }
-        }
+    // recommendation carousel controls
+    const recTrack = document.getElementById('recTrack'); let recIndex=0; const recLen = recTrack?.children?.length||0;
+    function updateRec(){
+      const w = recTrack.children[0].getBoundingClientRect().width + 12;
+      recTrack.style.transform = `translateX(${-(recIndex*w)}px)`;
+    }
+    document.getElementById('recNext')?.addEventListener('click', ()=>{recIndex = (recIndex+1)%recLen; updateRec()});
+    document.getElementById('recPrev')?.addEventListener('click', ()=>{recIndex = (recIndex-1+recLen)%recLen; updateRec()});
+    window.addEventListener('resize', ()=> setTimeout(updateRec,120));
 
-        if (dyslexiaToggle) dyslexiaToggle.addEventListener('change', applyReadingPrefs);
-        if (contrastToggle) contrastToggle.addEventListener('change', applyReadingPrefs);
-        if (fontSizeRange) fontSizeRange.addEventListener('input', applyReadingPrefs);
+    // adaptive reading prefs (keyboard accessible)
+    const focusModeToggle = document.getElementById('focus-mode-toggle');
+    focusModeToggle?.addEventListener('click', ()=>{document.querySelector('aside')?.classList.toggle('hidden');document.querySelector('header')?.classList.toggle('opacity-30')});
 
-        if (focusReadBtn) focusReadBtn.addEventListener('click', () => {
-          const aside = document.querySelector('aside');
-          const header = document.querySelector('header');
-          const main = document.querySelector('main');
-          if (aside) aside.classList.toggle('hidden');
-          if (header) header.classList.toggle('opacity-30');
-          if (focusReadBtn.textContent.includes('Enter')) {
-            focusReadBtn.textContent = 'Exit Focus Mode';
-          } else {
-            focusReadBtn.textContent = 'Enter Focus Mode';
-            if (aside) aside.classList.remove('hidden');
-            if (header) header.classList.remove('opacity-30');
-          }
-        });
+    // Pomodoro minimal
+    let pomodoroDuration = 25*60; let timer=null; let remaining=pomodoroDuration; const timerEl=document.getElementById('pomodoro-timer');
+    function formatMMSS(s){return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
+    function startPomodoro(){ if(timer) return; const startBtn=document.getElementById('start-btn'); startBtn.textContent='Pause'; timer=setInterval(()=>{remaining--; if(timerEl) timerEl.textContent=formatMMSS(remaining); if(remaining<=0){clearInterval(timer);timer=null;remaining=pomodoroDuration;startBtn.textContent='Start';flashConfetti()}} ,1000); startBtn.onclick=pausePomodoro }
+    function pausePomodoro(){ if(timer) clearInterval(timer); timer=null; const startBtn=document.getElementById('start-btn'); startBtn.textContent='Start'; startBtn.onclick=startPomodoro }
+    document.getElementById('start-btn')?.addEventListener('click', startPomodoro);
+    function flashConfetti(){ const el=document.createElement('div'); el.style.position='fixed'; el.style.inset=0; el.style.zIndex=60; el.style.pointerEvents='none'; el.style.background='radial-gradient(circle at 20% 30%, rgba(0,255,200,0.06), transparent 10%), radial-gradient(circle at 80% 70%, rgba(138,43,226,0.06), transparent 12%)'; document.body.appendChild(el); setTimeout(()=>el.remove(),800) }
 
-        // AI tone rewriter (server-backed)
-        async function rewriteArticleTone(tone){
-          const original = document.getElementById('original-article-text')?.textContent.trim() || '';
-          const out = document.getElementById('rewritten-article-output');
-          if (!out) return;
-          out.classList.add('shimmer');
-          out.textContent = 'Generating...';
+    // LLM integration (server-backed)
+    async function rewriteArticleTone(tone){ const original=document.getElementById('original-article-text')?.textContent||''; const out=document.getElementById('rewritten-article-output'); if(!out) return; out.textContent='Generating...'; out.classList.add('shimmer'); try{ const r=await fetch('/api/rewrite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:original,tone})}); if(!r.ok){ out.textContent='Error generating rewrite'; return } const data=await r.json(); out.textContent=data.rewritten||data.output||'No output'; out.animate([{opacity:0},{opacity:1}],{duration:360,fill:'forwards'}) }catch(e){console.error(e); out.textContent='Network error'} finally{out.classList.remove('shimmer')} }
 
-          try {
-            const resp = await fetch('/api/rewrite', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: original, tone })
-            });
-            if (!resp.ok) {
-              const err = await resp.text();
-              out.textContent = 'Error generating rewrite';
-              console.error(err);
-              out.classList.remove('shimmer');
-              return;
-            }
-            const data = await resp.json();
-            out.textContent = data.rewritten || 'No output';
-            out.style.opacity = 0;
-            out.style.transition = 'opacity .35s ease';
-            requestAnimationFrame(()=> out.style.opacity = 1);
-          } catch (e) {
-            console.error(e);
-            out.textContent = 'Network error';
-          } finally {
-            out.classList.remove('shimmer');
-          }
-        }
+    async function generateWellnessSuggestion(){ const el=document.getElementById('break-suggestion'); if(!el) return; el.textContent='Thinking...'; el.classList.add('shimmer'); try{ const r=await fetch('/api/suggestion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'reader is slightly fatigued'})}); if(!r.ok){el.textContent='Unable to fetch'; return} const d=await r.json(); el.textContent=d.suggestion||d.output||'Take a short break'; el.animate([{transform:'scale(.98)'},{transform:'scale(1.02)'},{transform:'scale(1)'}],{duration:420}) }catch(err){console.error(err); el.textContent='Network error'} finally{el.classList.remove('shimmer')} }
 
-        // Wellness suggestion via server-backed LLM
-        async function generateWellnessSuggestion(){
-          const suggestionEl = document.getElementById('break-suggestion');
-          if (!suggestionEl) return;
-          suggestionEl.classList.add('shimmer');
-          suggestionEl.textContent = 'Thinking...';
-          try {
-            const resp = await fetch('/api/suggestion', { method:'POST', headers:{'Content-Type':'application/json' }, body: JSON.stringify({ context: 'reader is slightly fatigued after reading technical article' })});
-            if (!resp.ok) {
-              suggestionEl.textContent = 'Could not fetch suggestion';
-              console.error(await resp.text());
-              suggestionEl.classList.remove('shimmer');
-              return;
-            }
-            const data = await resp.json();
-            suggestionEl.textContent = data.suggestion || 'Take a short break.';
-            suggestionEl.animate([{ transform:'scale(.98)'},{ transform:'scale(1.02)'},{ transform:'scale(1)'}], { duration: 450, easing: 'ease-out' });
-          } catch (err) {
-            suggestionEl.textContent = 'Could not fetch suggestion';
-            console.error(err);
-          } finally {
-            suggestionEl.classList.remove('shimmer');
-          }
-        }
+    // mode banner (show if not openai)
+    async function fetchModeAndNotify(){ try{ const r=await fetch('/api/mode'); if(!r.ok) return; const j=await r.json(); if(j.mode && j.mode!=='openai'){ const b=document.createElement('div'); b.setAttribute('role','status'); b.className='fixed left-1/2 -translate-x-1/2 top-4 z-60 bg-yellow-600/10 border border-yellow-400 text-yellow-200 px-4 py-2 rounded-md text-sm'; b.style.backdropFilter='blur(6px)'; b.textContent = j.mode==='simulate' ? 'Demo Mode: using simulated responses. Set OPENAI_API_KEY or LOCAL_MODEL_URL to enable live LLM.' : `Local Model Mode: forwarding to ${j.info||'local model'}`; document.body.appendChild(b); setTimeout(()=>b.remove(),8000) } }catch(e){console.warn('mode check failed',e)} }
+    window.addEventListener('load', fetchModeAndNotify);
 
-        // Pomodoro (simple)
-        let pomodoroDuration = 25 * 60;
-        let timer = null;
-        let remaining = pomodoroDuration;
-        const timerEl = document.getElementById('pomodoro-timer');
-
-        function formatMMSS(s){
-            const m = Math.floor(s/60).toString().padStart(2,'0');
-            const sec = (s%60).toString().padStart(2,'0');
-            return `${m}:${sec}`;
-        }
-
-        function startPomodoro(){
-            if(timer) return;
-            remaining = remaining || pomodoroDuration;
-            const startBtn = document.getElementById('start-btn');
-            if (startBtn) startBtn.textContent = 'Pause';
-            timer = setInterval(() => {
-                remaining--;
-                if(timerEl) timerEl.textContent = formatMMSS(remaining);
-                if(remaining <= 0){
-                    clearInterval(timer);
-                    timer = null;
-                    remaining = pomodoroDuration;
-                    showToast('Focus session complete 🎉', 'success');
-                    flashConfetti();
-                }
-            }, 1000);
-            document.getElementById('start-btn').onclick = pausePomodoro;
-        }
-
-        function pausePomodoro(){
-            if(timer) clearInterval(timer);
-            timer = null;
-            const startBtn = document.getElementById('start-btn');
-            if (startBtn) startBtn.textContent = 'Resume';
-            if (startBtn) startBtn.onclick = startPomodoro;
-        }
-
-        function resetPomodoro(){
-            if(timer) { clearInterval(timer); timer = null; }
-            remaining = pomodoroDuration;
-            if(timerEl) timerEl.textContent = formatMMSS(remaining);
-            const startBtn = document.getElementById('start-btn');
-            if (startBtn) startBtn.textContent = 'Start Focus';
-            if (startBtn) startBtn.onclick = startPomodoro;
-        }
-
-        // small toast
-        function showToast(msg, type='info'){
-            const el = document.createElement('div');
-            el.textContent = msg;
-            el.className = 'fixed right-6 top-6 px-4 py-2 rounded-md text-white z-50';
-            el.style.background = (type==='success') ? 'linear-gradient(90deg,#06b6d4,#0ea5e9)' : 'rgba(0,0,0,0.6)';
-            document.body.appendChild(el);
-            setTimeout(()=> el.style.opacity = '0', 2400);
-            setTimeout(()=> el.remove(), 3000);
-        }
-
-        function flashConfetti(){
-            const conf = document.createElement('div');
-            conf.style.position = 'fixed';
-            conf.style.inset = 0;
-            conf.style.pointerEvents = 'none';
-            conf.style.background = 'radial-gradient(circle at 20% 30%, rgba(0,255,200,0.08), transparent 10%), radial-gradient(circle at 80% 70%, rgba(255,100,200,0.06), transparent 12%)';
-            conf.style.zIndex = 80;
-            conf.style.transition = 'opacity .6s ease';
-            document.body.appendChild(conf);
-            setTimeout(()=> conf.style.opacity = '0', 600);
-            setTimeout(()=> conf.remove(), 900);
-        }
-
-        function toggleTheme(){
-            document.documentElement.classList.toggle('tech-glow');
-            showToast('Hi-tech mode toggled', 'success');
-        }
-
-        (function init(){
-            if(timerEl) timerEl.textContent = formatMMSS(pomodoroDuration);
-        })();
-    </script>
+    // accessibility: keyboard nav for cards (simple)
+    document.addEventListener('keydown', (e)=>{ if(e.key==='/' && document.activeElement?.tagName!=='INPUT'){ e.preventDefault(); document.getElementById('search')?.focus(); } });
+  </script>
 </body>
 </html>
